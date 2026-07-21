@@ -51,7 +51,12 @@ sagemaker = ">=2.232.2"
 sentence-transformers = "^2.2.2"
 gradio = "^5.5.0"
 langsmith = "^0.1.141"
-torch = "2.2.2"
+torch = {version = "2.2.2", source = "pytorch-cpu"}
+
+[[tool.poetry.source]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
 
 [tool.poetry.group.feature_pipeline.dependencies]
 bytewax = "0.18.2"
