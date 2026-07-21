@@ -22,14 +22,17 @@ WORKDIR /app
 # Copy the pyproject.toml and poetry.lock files from the root directory
 COPY ./pyproject.toml ./poetry.lock ./
 
+# Pre-install the CPU-only build of torch. If we let poetry pull the default
+# PyPI torch wheel it also drags in several GB of NVIDIA CUDA packages that
+# this container never uses (no local GPU here), which was blowing past disk
+# limits in constrained environments like GitHub Codespaces.
+RUN pip install --no-cache-dir torch==2.2.2+cpu --index-url https://download.pytorch.org/whl/cpu
+
 # Install the dependencies and clear cache
 RUN poetry config virtualenvs.create false && \
     poetry install --no-root --no-interaction --no-cache && \
     rm -rf ~/.cache/pypoetry/cache/ && \
     rm -rf ~/.cache/pypoetry/artifacts/
-
-# Install dependencies
-RUN poetry install --no-root
 
 # Copy the data_cdc and core directories
 COPY ./src/data_cdc ./data_cdc
