@@ -28,6 +28,12 @@ RUN apt-get remove -y curl
 # Copy the pyproject.toml and poetry.lock files from the root directory
 COPY ./pyproject.toml ./poetry.lock ./
 
+# Pre-install the CPU-only build of torch. Letting poetry pull the default
+# PyPI torch wheel also drags in several GB of NVIDIA CUDA packages that are
+# unused here (EMBEDDING_MODEL_DEVICE=cpu), which was blowing past disk
+# limits in constrained environments like GitHub Codespaces.
+RUN pip install --no-cache-dir torch==2.2.2+cpu --index-url https://download.pytorch.org/whl/cpu
+
 # Install the dependencies and clear cache
 RUN poetry config virtualenvs.create false && \
     poetry install --no-root --no-interaction --no-cache && \
@@ -48,3 +54,4 @@ RUN chmod +x /usr/src/app/scripts/bytewax_entrypoint.sh
 
 # Command to run the Bytewax pipeline script
 CMD ["/usr/src/app/scripts/bytewax_entrypoint.sh"]
+
